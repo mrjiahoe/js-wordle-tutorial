@@ -55,6 +55,7 @@ function insertLetter(pressedKey) {
 
 	let row = document.getElementsByClassName("letter-row")[6 - guessesRemaining];
 	let box = row.children[nextLetter];
+	animateCSS(box, "pulse");
 	box.textContent = pressedKey;
 	box.classList.add("filled-box");
 	currentGuess.push(pressedKey);
@@ -126,6 +127,8 @@ function checkGuess() {
 
 		let delay = 250 * i;
 		setTimeout(() => {
+			//flip box
+			animateCSS(box, "flipInX");
 			//shade box
 			box.style.backgroundColor = letterColor;
 			shadeKeyBoard(letter, letterColor);
@@ -147,6 +150,26 @@ function checkGuess() {
 		}
 	}
 }
+
+const animateCSS = (element, animation, prefix = "animate__") =>
+	// Wr create a Promise and return it
+	new Promise((resolve, reject) => {
+		const animationName = `${prefix}${animation}`;
+		// const node = document.querySelector(element);
+		const node = element;
+		node.style.setProperty("--animate-duration", "0.3s");
+
+		node.classList.add(`${prefix}animate`, animationName);
+
+		// When the animation ends, we clean the classes and resolve the Promise
+		function handleAnimationEnd(event) {
+			event.stopPropagation();
+			node.classList.remove(`${prefix}animated`, animationName);
+			resolve("Animation ended");
+		}
+
+		node.addEventListener("animationed", handleAnimationEnd, { once: true });
+	});
 
 document.addEventListener("keyup", (e) => {
 	if (guessesRemaining === 0) {
