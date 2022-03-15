@@ -24,29 +24,27 @@ function initBoard() {
 	}
 }
 
-document.addEventListener("keyup", (e) => {
-	if (guessesRemaining === 0) {
-		return;
-	}
+function shadeKeyBoard(letter, color) {
+	// shadeKeyBoard receives the letter on the on-screen keyboard we want to shade and the color we want to shade it. thi is the algorithm:
+	// 1. Find the key that matches the given letter
+	// 2. If the key is already green, do nothing
+	// 3. If the key is currently yellow, only allow it to become green
+	// 4. Else, shade the key passed to the function
+	for (const elem of document.getElementsByClassName("keyboard-button")) {
+		if (elem.textContent === letter) {
+			let oldColor = elem.style.backgroundColor;
+			if (oldColor === "green") {
+				return;
+			}
+			if (oldColor === "yellow" && color !== "green") {
+				return;
+			}
 
-	let pressedKey = String(e.key);
-	if (pressedKey === "Backspace" && nextLetter !== 0) {
-		deleteLetter();
-		return;
+			elem.style.backgroundColor = color;
+			break;
+		}
 	}
-
-	if (pressedKey === "Enter") {
-		checkGuess();
-		return;
-	}
-
-	let found = pressedKey.match(/[a-z]/gi);
-	if (!found || found.length > 1) {
-		return;
-	} else {
-		insertLetter(pressedKey);
-	}
-});
+}
 
 function insertLetter(pressedKey) {
 	// insertLetter checks that there's still space in the guess for this letter, finds the appropriate row, and puts the letter in the box
@@ -150,26 +148,44 @@ function checkGuess() {
 	}
 }
 
-function shadeKeyBoard(letter, color) {
-	// shadeKeyBoard receives the letter on the on-screen keyboard we want to shade and the color we want to shade it. thi is the algorithm:
-	// 1. Find the key that matches the given letter
-	// 2. If the key is already green, do nothing
-	// 3. If the key is currently yellow, only allow it to become green
-	// 4. Else, shade the key passed to the function
-	for (const elem of document.getElementsByClassName("keyboard-button")) {
-		if (elem.textContent === letter) {
-			let oldColor = elem.style.backgroundColor;
-			if (oldColor === "green") {
-				return;
-			}
-			if (oldColor === "yellow" && color !== "green") {
-				return;
-			}
-
-			elem.style.backgroundColor = color;
-			break;
-		}
+document.addEventListener("keyup", (e) => {
+	if (guessesRemaining === 0) {
+		return;
 	}
-}
+
+	let pressedKey = String(e.key);
+	if (pressedKey === "Backspace" && nextLetter !== 0) {
+		deleteLetter();
+		return;
+	}
+
+	if (pressedKey === "Enter") {
+		checkGuess();
+		return;
+	}
+
+	let found = pressedKey.match(/[a-z]/gi);
+	if (!found || found.length > 1) {
+		return;
+	} else {
+		insertLetter(pressedKey);
+	}
+});
+
+document.getElementById("keyboard-cont").addEventListener("click", (e) => {
+	// This function listens for a click on the keyboard container or any of its children (the buttons). If the clicked element was not a button, we exit the function. Else, we dispatch a key up event corresponding to the clicked key
+	const target = e.target;
+
+	if (!target.classList.contains("keyboard-button")) {
+		return;
+	}
+	let key = target.textContent;
+
+	if (key === "Del") {
+		key = "Backspace";
+	}
+
+	document.dispatchEvent(new KeyboardEvent("keyup", { key: key }));
+});
 
 initBoard();
